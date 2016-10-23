@@ -47,7 +47,7 @@
   become: true
   become_user: "{{taskd_user}}"
 
-- name: compille and install
+- name: compile and install
   shell: "make && make install"
   args:
     chdir: "{{taskd_source_dir}}"

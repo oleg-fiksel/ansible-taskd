@@ -1,0 +1,35 @@
+---
+- block:
+  - name: check if config exists
+    stat:
+      path: "{{taskd_data_path}}/config"
+    register: config_state
+
+  - fail:
+      msg: "config already exist"
+    when: config_state.stat.exists == True
+
+  - name: copy the config
+    template:
+      src: config
+      dest: "{{taskd_data_path}}/config"
+      owner: "{{taskd_user}}"
+      group: "{{taskd_group}}"
+      mode: 'u=rw,g=r,o=r'
+    notify:
+    - restart taskd
+
+  - name: create orgs directory
+    file:
+      path: "{{taskd_data_path}}/orgs"
+      state: directory
+      owner: "{{taskd_user}}"
+      group: "{{taskd_group}}"
+      mode: 'u=rwx,g=rx,o=rx'
+    notify:
+    - restart taskd
+
+  rescue:
+
+  - debug:
+      msg: "proceed"

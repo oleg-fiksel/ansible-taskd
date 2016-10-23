@@ -1,0 +1,20 @@
+---
+- block:
+  - name: check if data needs to be initialized
+    stat:
+      path: "{{taskd_data_path}}/orgs"
+    register: data_state
+
+  - fail:
+      msg: "data/org directory exists already"
+    when: data_state.stat.exists == True
+
+  - name: run taskd init
+    shell: "{{taskd_install_dir}}/bin/taskd init --data {{taskd_data_path}}"
+    notify:
+    - restart taskd
+
+  rescue:
+
+  - debug:
+      msg: "proceed"

@@ -1,0 +1,17 @@
+[Unit]
+Description=Secure server providing multi-user, multi-client access to Taskwarrior data
+Requires=network.target
+After=network.target
+Documentation=http://taskwarrior.org/docs/#taskd
+
+[Service]
+ExecStart={{taskd_symlink_dir}}/bin/taskd server --data {{taskd_data_path}}
+Type=simple
+User={{taskd_user}}
+Group={{taskd_group}}
+WorkingDirectory={{taskd_data_path}}
+InaccessibleDirectories=/root /boot /opt /mnt /media
+ReadOnlyDirectories=/etc /usr
+
+[Install]
+WantedBy=multi-user.target

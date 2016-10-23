@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export PATH={{taskd_install_dir}}/bin:$PATH
+export TASKDDATA={{taskd_data_path}}

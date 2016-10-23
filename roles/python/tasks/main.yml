@@ -1,0 +1,17 @@
+---
+- block: 
+  - name: check if python-2.7 is installed
+    raw: stat /usr/bin/python
+    register: python_file
+
+  rescue:
+  - name: install python-2.7
+    raw: apt-get update -qq && apt-get install -qq python2.7
+
+  - name: check if softlink exists
+    raw: stat /usr/bin/python2.7
+    register: python_binary
+
+  - name: create softlink for python 2.7
+    raw: ln -s /usr/bin/python2.7 /usr/bin/python
+    when: python_binary.rc == 0

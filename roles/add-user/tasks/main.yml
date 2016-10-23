@@ -1,0 +1,60 @@
+---
+- name: variable taskd_org
+  debug:
+    msg: "{{ taskd_org  | mandatory }}"
+
+- name: variable taskd_client
+  debug:
+    msg: "{{ taskd_client  | mandatory }}"
+
+- block:
+  - name: check if Org {{taskd_org}} exists
+    stat:
+      path: "{{taskd_data_path}}/orgs/{{taskd_org}}"
+    register: org
+  
+  - name: create Org {{taskd_org}}
+    shell: "{{taskd_install_dir}}/bin/taskd add org {{taskd_org}} --data {{taskd_data_path}}"
+    when: org.stat.exists == false
+    become: true
+    become_user: "{{taskd_user}}"
+
+- block:
+  - name: check if client {{taskd_client}} exists
+    find:
+      paths: "{{taskd_data_path}}/orgs/{{taskd_org}}/users"
+      contains: "user={{taskd_client}}"
+      recurse: yes
+    register: user
+
+  - fail:
+      msg: "client {{taskd_client}} already exist"
+    when: user.matched != 0
+
+  - name: create user {{taskd_client}}
+    shell: "{{taskd_install_dir}}/bin/taskd add user {{taskd_org}} {{taskd_client}} --data {{taskd_data_path}}"
+    when: user.matched == 0
+    become: true
+    become_user: "{{taskd_user}}"
+    register: created_user
+    notify:
+    - restart taskd
+
+  - debug:
+      msg: "{{created_user.stdout_lines[0]}}"
+
+  - name: generate certificate for {{taskd_client}}
+    shell: "{{taskd_source_dir}}/pki/generate.client {{taskd_client}}"
+    args:
+      chdir: "{{taskd_certs_path}}"
+    when: user.matched == 0
+    become: true
+    become_user: "{{taskd_user}}"
+    notify:
+    - restart taskd
+
+  rescue:
+
+  - debug:
+      msg: "proceed"
+

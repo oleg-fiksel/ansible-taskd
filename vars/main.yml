@@ -1,0 +1,13 @@
+---
+taskd_version: 1.1.0
+taskd_git_tag: "s{{taskd_version}}"
+taskd_user: taskd
+taskd_group: taskd
+taskd_home: /home/taskd
+taskd_source_dir: "{{taskd_home}}/{{taskd_version}}"
+taskd_install_dir: "{{taskd_source_dir}}/install"
+taskd_symlink_dir: "{{taskd_home}}/active"
+taskd_data_path: "{{taskd_home}}/data"
+taskd_certs_path: "{{taskd_data_path}}/certs"
+taskd_fqdn: taskd.fiksel.info
+taskd_repo_url: 'https://git.tasktools.org/scm/tm/taskd.git'

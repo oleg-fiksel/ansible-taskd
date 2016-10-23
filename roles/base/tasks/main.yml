@@ -1,0 +1,87 @@
+---
+- name: install dependencies
+  apt: name={{item}}
+  with_items:
+    - libgnutls-dev
+    - uuid-dev
+    - cmake
+    - make
+    - build-essential
+    - gnutls-bin
+    - git
+
+- name: create group
+  group:
+    name: "{{taskd_group}}"
+
+- name: create user
+  user:
+    name: "{{taskd_user}}"
+    group: "{{taskd_group}}"
+    home: "{{taskd_home}}"
+
+- name: create dirs
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "{{taskd_user}}"
+    group: "{{taskd_group}}"
+  with_items:
+      - "{{taskd_data_path}}"
+      - "{{taskd_source_dir}}"
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: check out source code
+  git:
+    repo: "{{taskd_repo_url}}"
+    dest: "{{taskd_source_dir}}"
+    refspec: "{{taskd_git_tag}}"
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: prepare the source
+  shell: "cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX:PATH={{taskd_install_dir}} ."
+  args:
+    chdir: "{{taskd_source_dir}}"
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: compille and install
+  shell: "make && make install"
+  args:
+    chdir: "{{taskd_source_dir}}"
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: switch symlink
+  file:
+    src: "{{taskd_install_dir}}"
+    dest: "{{taskd_symlink_dir}}"
+    state: link
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: create env file
+  template:
+    src: env
+    dest: "{{taskd_install_dir}}/bin/env"
+    mode: 'u=rwx,g=rx,o=rx'
+  become: true
+  become_user: "{{taskd_user}}"
+
+- name: create systemd service
+  template:
+    src: taskd.service
+    dest: /etc/systemd/system/taskd.service
+
+- name: reload systemd
+  shell: systemctl daemon-reload
+
+- name: enable taskd systemd service
+  service:
+    name: taskd
+    enabled: yes
+  notify:
+  - restart taskd
+

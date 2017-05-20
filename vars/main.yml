@@ -10,4 +10,4 @@ taskd_symlink_dir: "{{taskd_home}}/active"
 taskd_data_path: "{{taskd_home}}/data"
 taskd_certs_path: "{{taskd_data_path}}/certs"
 taskd_fqdn: taskd.fiksel.info
-taskd_repo_url: 'https://git.tasktools.org/scm/tm/taskd.git'
+taskd_repo_url: 'https://git.tasktools.org/TM/taskd.git'

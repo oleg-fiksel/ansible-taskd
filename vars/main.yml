@@ -1,5 +1,5 @@
 ---
-taskd_version: 1.1.0
+taskd_version: 1.2.0
 taskd_git_tag: "s{{taskd_version}}"
 taskd_user: taskd
 taskd_group: taskd
